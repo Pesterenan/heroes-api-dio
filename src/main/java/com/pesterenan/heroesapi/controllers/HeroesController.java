@@ -2,6 +2,7 @@ package com.pesterenan.heroesapi.controllers;
 
 import static com.pesterenan.heroesapi.constants.HeroesConstant.HEROES_ENDPOINT_LOCAL;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,7 +14,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.pesterenan.heroesapi.documents.Heroes;
-import com.pesterenan.heroesapi.repository.HeroesRepository;
 import com.pesterenan.heroesapi.service.HeroesService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +24,13 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class HeroesController {
 
+	@Autowired
 	HeroesService heroServ;
-	HeroesRepository heroRepo;
 
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HeroesController.class);
 
-	public HeroesController(HeroesService heroServ, HeroesRepository heroRepo) {
-		super();
+	public HeroesController(HeroesService heroServ) {
 		this.heroServ = heroServ;
-		this.heroRepo = heroRepo;
 	}
 
 	@GetMapping(HEROES_ENDPOINT_LOCAL)
@@ -41,10 +39,11 @@ public class HeroesController {
 		return heroServ.findAll();
 	}
 
-	@GetMapping(HEROES_ENDPOINT_LOCAL + "/id")
+	@GetMapping(HEROES_ENDPOINT_LOCAL + "/{id}")
 	public Mono<ResponseEntity<Heroes>> findHeroById(@PathVariable String id) {
 		log.info("Requesting hero by id: {}", id);
-		return heroServ.findById(id).map((item) -> new ResponseEntity<>(item, HttpStatus.OK))
+		return heroServ.findById(id)
+				.map((item) -> new ResponseEntity<>(item, HttpStatus.OK))
 				.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
@@ -55,11 +54,11 @@ public class HeroesController {
 		return heroServ.save(hero);
 	}
 
-	@DeleteMapping(HEROES_ENDPOINT_LOCAL + "/id")
-	@ResponseStatus(code = HttpStatus.CONTINUE)
+	@DeleteMapping(HEROES_ENDPOINT_LOCAL + "/{id}")
+	@ResponseStatus(code = HttpStatus.NOT_FOUND)
 	public Mono<HttpStatus> deleteHeroById(@PathVariable String id) {
 		heroServ.deleteById(id);
 		log.info("Deleting a hero with id: {}", id);
-		return Mono.just(HttpStatus.CONTINUE);
+		return Mono.just(HttpStatus.NOT_FOUND);
 	}
 }

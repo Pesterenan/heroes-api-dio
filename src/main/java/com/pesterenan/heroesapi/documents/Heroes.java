@@ -16,18 +16,17 @@ public class Heroes {
 	@Id
 	@DynamoDBHashKey(attributeName = "id")
 	private String id;
-	@Id
+	
 	@DynamoDBAttribute(attributeName = "name")
 	private String name;
-	@Id
+	
 	@DynamoDBAttribute(attributeName = "universe")
 	private String universe;
-	@Id
+	
 	@DynamoDBAttribute(attributeName = "movies")
 	private int movies;
 
 	public Heroes(String id, String name, String universe, int movies) {
-		super();
 		this.id = id;
 		this.name = name;
 		this.universe = universe;
