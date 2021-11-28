@@ -7,9 +7,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 
-import static com.pesterenan.heroesapi.constants.HeroesConstant.ENDPOINT_DYNAMO;
-import static com.pesterenan.heroesapi.constants.HeroesConstant.REGION_DYNAMO;
-
 import java.util.Arrays;
 
 import org.socialsignin.spring.data.dynamodb.repository.config.EnableDynamoDBRepositories;
@@ -24,25 +21,20 @@ import com.amazonaws.services.dynamodbv2.model.KeySchemaElement;
 import com.amazonaws.services.dynamodbv2.model.AttributeDefinition;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
+import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.PutItemOutcome;
+import static com.pesterenan.heroesapi.constants.HeroesConstant.*;
 
-@Configuration
-@EnableDynamoDBRepositories
-public class HeroesTable {
-	
+public class HeroesData {
 	public static void main(String[] args) {
 		AmazonDynamoDB client = AmazonDynamoDBClientBuilder.standard()
 				.withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(ENDPOINT_DYNAMO, REGION_DYNAMO)).build();
-		
+
 		DynamoDB dynamoDB = new DynamoDB(client);
-		String tableName = "Heroes_Table";
+		Table table = dynamoDB.getTable("Heroes_Table");
+		Item hero = new Item().withPrimaryKey("id", 1).withString("name", "IronMan")
+				.withString("universe", "Marvel Comics").withNumber("movies", 3);
 		
-		try {
-			Table table = dynamoDB.createTable(tableName, Arrays.asList(new KeySchemaElement("id", KeyType.HASH)),
-					Arrays.asList(new AttributeDefinition("id", ScalarAttributeType.S)),
-					new ProvisionedThroughput(5L, 5L));
-			table.waitForActive();
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
+		PutItemOutcome outcome = table.putItem(hero);
 	}
 }
