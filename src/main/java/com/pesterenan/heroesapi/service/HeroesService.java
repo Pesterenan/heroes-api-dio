@@ -1,5 +1,6 @@
 package com.pesterenan.heroesapi.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pesterenan.heroesapi.documents.Heroes;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class HeroesService {
 
+	@Autowired
 	private final HeroesRepository heroRepo;
 
 	public HeroesService(HeroesRepository heroRepo) {

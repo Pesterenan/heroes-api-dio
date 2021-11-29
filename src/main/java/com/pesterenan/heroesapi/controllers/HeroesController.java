@@ -2,7 +2,7 @@ package com.pesterenan.heroesapi.controllers;
 
 import static com.pesterenan.heroesapi.constants.HeroesConstant.HEROES_ENDPOINT_LOCAL;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,17 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 import com.pesterenan.heroesapi.documents.Heroes;
 import com.pesterenan.heroesapi.service.HeroesService;
 
-import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@Slf4j
 public class HeroesController {
 
-	@Autowired
 	HeroesService heroServ;
-
 	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(HeroesController.class);
 
 	public HeroesController(HeroesService heroServ) {
@@ -42,8 +38,7 @@ public class HeroesController {
 	@GetMapping(HEROES_ENDPOINT_LOCAL + "/{id}")
 	public Mono<ResponseEntity<Heroes>> findHeroById(@PathVariable String id) {
 		log.info("Requesting hero by id: {}", id);
-		return heroServ.findById(id)
-				.map((item) -> new ResponseEntity<>(item, HttpStatus.OK))
+		return heroServ.findById(id).map((item) -> new ResponseEntity<>(item, HttpStatus.OK))
 				.defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
 	}
 
@@ -57,8 +52,13 @@ public class HeroesController {
 	@DeleteMapping(HEROES_ENDPOINT_LOCAL + "/{id}")
 	@ResponseStatus(code = HttpStatus.NOT_FOUND)
 	public Mono<HttpStatus> deleteHeroById(@PathVariable String id) {
-		heroServ.deleteById(id);
-		log.info("Deleting a hero with id: {}", id);
+		try {
+			heroServ.deleteById(id);
+			log.info("Deleting a hero with id: {}", id);
+		} catch (EmptyResultDataAccessException e) {
+			log.info("The hero with id {} doesn't exists.", id);
+		}
+
 		return Mono.just(HttpStatus.NOT_FOUND);
 	}
 }

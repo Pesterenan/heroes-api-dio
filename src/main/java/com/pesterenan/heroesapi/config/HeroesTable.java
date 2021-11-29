@@ -30,7 +30,7 @@ public class HeroesTable {
 
 		DynamoDB dynamoDB = new DynamoDB(client);
 		String tableName = "Heroes_Table";
-
+		
 		try {
 			System.out.println("Criando tabela...");
 			Table table = dynamoDB.createTable(tableName, Arrays.asList(new KeySchemaElement("id", KeyType.HASH)),
